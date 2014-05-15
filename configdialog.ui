@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Test Configuration</string>
+   <string>Vide Capture Configuration</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -157,7 +157,7 @@
        </property>
        <property name="icon">
         <iconset resource="images.qrc">
-         <normaloff>:/images/droneicon.jpg</normaloff>:/images/droneicon.jpg</iconset>
+         <normaloff>:/images/droneicon.png</normaloff>:/images/droneicon.png</iconset>
        </property>
        <property name="iconSize">
         <size>

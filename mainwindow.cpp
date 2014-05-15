@@ -41,7 +41,7 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
 {
     ui->setupUi(this);
     mTrayIcon = new QSystemTrayIcon(this);
-    mTrayIcon->setIcon(QIcon(R"(:/images/droneicon.jpg)"));
+    mTrayIcon->setIcon(QIcon(R"(:/images/droneicon.png)"));
     mTrayIcon->setToolTip("Test");
     mTrayIcon->setVisible(true);
     if(!QSystemTrayIcon::isSystemTrayAvailable())
@@ -223,7 +223,7 @@ bool MainWindow::checkConfiguration()
 void MainWindow::configureVideoRecordingManager()
 {
     delete mRecordManager;
-    mRecordManager = new VideoRecordingManager(this,mConfigUi->VideoDirectory->text(),
+    mRecordManager = new VideoRecordingManager(this,(mConfigUi->VideoDirectory->text() +"/"),
                                                mConfigUi->ProcessPath->text(),
                                                mConfigUi->SelectVideoEncoder->currentText(),
                                                mConfigUi->SelectInputFormat->currentText(),
@@ -260,9 +260,9 @@ void MainWindow::startRecording()
         else
         {
             filename = QDateTime::currentDateTime().toString().replace(" ","-").replace(":","-");
-            filename.append(".mpeg");
+            filename.append(".mpg");
         }
-        qDebug() << filename;
+        qDebug() << "File name fetched: " << filename;
         // Check File Path
         if(filename.isEmpty())
         {
@@ -277,7 +277,7 @@ void MainWindow::startRecording()
         // Check if Recorder is already created
         if(mRecordManager == nullptr)
         {
-            mRecordManager = new VideoRecordingManager(this,mConfigUi->VideoDirectory->text(),
+            mRecordManager = new VideoRecordingManager(this,mConfigUi->VideoDirectory->text() + "/",
                                                        mConfigUi->ProcessPath->text(),
                                                        mConfigUi->SelectVideoEncoder->currentText(),
                                                        mConfigUi->SelectInputFormat->currentText(),
@@ -286,11 +286,15 @@ void MainWindow::startRecording()
             connect(mRecordManager,SIGNAL(mediaInfoAvailable(QString,QString)),this,SLOT(writeMediaInfo(QString,QString)));
         }
         int last_slash(filename.lastIndexOf(QDir::separator()));
-        QString directory = filename.left(last_slash);
+
+        QString directory;
+        if(!mAutonomousMode)
+            directory  = filename.left(last_slash+1);
         filename.replace(directory ,"");
         mTrayIcon->showMessage("Started Recording","Video has started recording\n" + filename + "  " + directory);
         qDebug() << filename << "\n" << directory;
         mRecording = true;
+        qDebug() << "File name entering start recording" << filename;
         mRecordManager->startRecording(filename);
 
 

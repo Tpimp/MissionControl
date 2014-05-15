@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/images">
         <file alias="droneicon.png">droneicon.png</file>
-        <file alias="droneicon.jpg">droneicon.jpg</file>
     </qresource>
 </RCC>

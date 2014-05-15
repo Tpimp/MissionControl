@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Server Monitor</string>
   </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QMenuBar" name="menuBar">
