@@ -16,6 +16,7 @@ void VideoInfoReader::FetchMediaInfo(QString video_path)
         // Prepare arguments list
         QStringList args;
         args << video_path;
+        qDebug() << video_path;
         // set current path
         mCurrentMediaPath = video_path;
         // clear the current data

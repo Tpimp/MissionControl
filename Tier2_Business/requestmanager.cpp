@@ -7,6 +7,7 @@
 #include <QStringList>
 
 #include "Tier3_Persistance/videolocator.h"
+#include "Tier3_Persistance/videoinforeader.h"
 
 RequestManager::RequestManager(QObject *parent) :
     QObject(parent)
@@ -129,6 +130,9 @@ QVariant RequestManager::processRequest(QString function, QTcpSocket *caller, QV
     QVariant variant;
     if(function.isEmpty())
         return QVariant();
+
+    // Create parse branch RPC implementation
+
     if(function.at(0).toLatin1() == 'V')
     {
         if(function.at(1).toLatin1() == 'i')
@@ -139,7 +143,7 @@ QVariant RequestManager::processRequest(QString function, QTcpSocket *caller, QV
             }
             else if(function.at(5) == 'I')
             {
-                variant = requestVideoList(caller, params);
+                variant = requestVideoInfo(caller, params);
             }
             else if(function.at(5) == 'T')
             {
@@ -158,6 +162,9 @@ QVariant RequestManager::processRequest(QString function, QTcpSocket *caller, QV
 
     return variant;
 }
+
+
+
 
 
 bool RequestManager::removeWatchList(QTcpSocket *socket)
@@ -206,6 +213,50 @@ QVariant RequestManager::requestVideoList(QTcpSocket *caller, QVariant params)
 
 QVariant RequestManager::requestVideoInfo(QTcpSocket *caller, QVariant params)
 {
+    // Unpack the QVariant
+    // Layers - QJsonObject { [ QJSonValue FuncName = "VideoInfo", QJSonValue  VideoName = "video_passed"] }
+    QJsonObject jobject = params.toJsonObject();
+    QJsonValue videoname_value = jobject["VideoName"];
+    QString videoname;
+    if(videoname_value.isString())
+        videoname = videoname_value.toString("");
+    else
+    {
+        qDebug() << "VideoInfo function passed invalid paramter VideoName: " << videoname_value;
+        return QVariant();
+    }
+
+    // fetched videoname now check if the info file exists
+    VideoInfoReader   * inforeader = new VideoInfoReader(this,"mediainfo");
+
+
+    // work some lambda magic Connect inforeader to the RequestManager,
+    // when the media is fetched... call an inline "Slot" and pass name and info
+    connect(inforeader, &VideoInfoReader::FetchedMediaInfo , [=](QString videoname, QString videoinfo)
+    {   // ... execute this inline lamdba function
+
+        // disconnect the slot (don't need it anymore clean up)
+        disconnect(inforeader, 0, this, 0);
+
+
+        QJsonObject return_obj;
+        qDebug() << videoname;
+        return_obj["VideoName"] = videoname.remove("/home/odroid/Videos//");
+        return_obj["VideoInfo"] = videoinfo;
+        // create a JsonDocument Wrapper = "{}"
+        QJsonDocument doc;
+        doc.setObject(return_obj);
+        QByteArray message(doc.toJson()); // out to JSON
+        // Prepend the Start Byte and Append the End Byte
+        message.push_front("\001");
+        message.push_back("\004");
+        inforeader->deleteLater();
+        emit returnMessageReady(caller, message);
+    });
+
+    inforeader->FetchMediaInfo(mVideoDirectory + "//" + videoname);
+   // mRecordingManager->requestMediaInfo(mVideoDirectory +  videoname);
+
     return QVariant();
 }
 

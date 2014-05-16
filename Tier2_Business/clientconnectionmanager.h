@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include <QList>
 #include "Tier2_Business/requestmanager.h"
+#include "Tier2_Business/videorecordingmanager.h"
 
 class ClientConnectionManager : public QObject
 {

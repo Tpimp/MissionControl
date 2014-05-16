@@ -63,10 +63,10 @@ void ConfigDialog::openDialog()
         {
             ui->SelectResolution->addItem(QVariant(size).toString());
         }
-        QStringList containers_support(recorder.supportedContainers());
-        foreach(QString container, containers_support)
+        QStringList encoder_support(recorder.supportedVideoCodecs());
+        foreach(QString encoder, encoder_support)
         {
-            ui->SelectInputFormat->addItem(container);
+            ui->SelectInputFormat->addItem(encoder);
         }
         ui->SelectInputFormat->addItem("mjpeg");
         ui->SelectResolution->addItem(QString("1280x720"), QVariant(QSize(1280,720)));

@@ -1,6 +1,10 @@
 #include "videorecordingmanager.h"
+
 #include <QDebug>
-VideoRecordingManager::VideoRecordingManager(QObject *parent,
+
+#include "mainwindow.h"
+
+VideoRecordingManager::VideoRecordingManager(MainWindow *parent,
                                              QString video_directory,
                                              QString video_process_path,
                                              QString video_encoder,
@@ -15,15 +19,11 @@ VideoRecordingManager::VideoRecordingManager(QObject *parent,
 {
     connect(&mVideoWriterProcess,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(recordingFinished(int,QProcess::ExitStatus)));
-    connect(&mInfoReader,SIGNAL(FetchedMediaInfo(QString,QString)),this,SLOT(recievedMediaInfo(QString,QString)));
+    connect(&mInfoReader,SIGNAL(FetchedMediaInfo(QString,QString)),parent,SLOT(writeMediaInfo(QString,QString)));
+
 }
 
 
-
-void VideoRecordingManager::recievedMediaInfo(QString video_path, QString mediadata)
-{
-    emit mediaInfoAvailable(video_path,mediadata);
-}
 
 
 void VideoRecordingManager::recordingFinished(int,QProcess::ExitStatus)

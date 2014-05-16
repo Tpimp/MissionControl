@@ -5,23 +5,24 @@
 #include "Tier3_Persistance/videoinforeader.h"
 #include "Tier3_Persistance/videowriterprocess.h"
 
+class MainWindow;
 
 class VideoRecordingManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit VideoRecordingManager(QObject *parent, QString video_directory, QString video_process_path,
+    explicit VideoRecordingManager(MainWindow *parent, QString video_directory, QString video_process_path,
                                    QString video_encoder, QString input_format,
                                    QString recording_resolution,
                                    QString current_device);
     ~VideoRecordingManager();
     QString     mCurrentDirectory;
 
+    VideoInfoReader * getVideoInfoReader(){return &mInfoReader;}
+
 signals:
-    void  mediaInfoAvailable(QString video_path, QString mediadata);
 
 private slots:
-    void recievedMediaInfo(QString video_path, QString mediadata);
     void recordingFinished(int, QProcess::ExitStatus);
 
 public slots:    
