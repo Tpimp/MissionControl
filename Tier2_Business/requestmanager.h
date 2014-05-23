@@ -33,7 +33,8 @@ private:
     QVariant  processRequest(QString function, QTcpSocket * caller, QVariant params);
     QVariant  requestVideoInfo(QTcpSocket * caller, QVariant params);
     QVariant  requestVideoList(QTcpSocket * caller, QVariant params);
-    QVariant  requestVideoTransfer(QTcpSocket * caller, QVariant params);
+    QVariant  requestVideoTransfer(QTcpSocket *&caller, QVariant params);
+    void      videoTransferThreadFinished(QString videoname);
 
 };
 

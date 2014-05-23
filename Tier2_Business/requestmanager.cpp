@@ -4,10 +4,14 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QTcpSocket>
+#include <QAbstractSocket>
 #include <QStringList>
-
+#include <QThreadPool>
 #include "Tier3_Persistance/videolocator.h"
 #include "Tier3_Persistance/videoinforeader.h"
+
+#include "Tier2_Business/streamtransferthread.h"
+#include <QMainWindow>
 
 RequestManager::RequestManager(QObject *parent) :
     QObject(parent)
@@ -125,7 +129,7 @@ QVariant RequestManager::processMessage(QString buffered_message)
 }
 
 
-QVariant RequestManager::processRequest(QString function, QTcpSocket *caller, QVariant params)
+QVariant RequestManager::processRequest(QString function, QTcpSocket * caller, QVariant params)
 {
     QVariant variant;
     if(function.isEmpty())
@@ -227,7 +231,7 @@ QVariant RequestManager::requestVideoInfo(QTcpSocket *caller, QVariant params)
     }
 
     // fetched videoname now check if the info file exists
-    VideoInfoReader   * inforeader = new VideoInfoReader(this,"mediainfo");
+    VideoInfoReader   * inforeader = new VideoInfoReader(this,"mediainfo", "//home/odroid/.config/MissionControl/media_info_format.txt");
 
 
     // work some lambda magic Connect inforeader to the RequestManager,
@@ -260,9 +264,43 @@ QVariant RequestManager::requestVideoInfo(QTcpSocket *caller, QVariant params)
     return QVariant();
 }
 
-QVariant RequestManager::requestVideoTransfer(QTcpSocket *caller, QVariant params)
+QVariant RequestManager::requestVideoTransfer(QTcpSocket *& caller, QVariant params)
 {
+    // VIDEO TRANSFER COMING SOON
+    // get the video name
+    QJsonObject jobject = params.toJsonObject();
+    QJsonValue videoname_value = jobject["VideoName"];
+    QString videoname;
+    if(videoname_value.isString())
+        videoname = videoname_value.toString("");
+    else
+    {
+        qDebug() << "VideoTransfer function passed invalid paramter VideoName: " << videoname_value;
+        return QVariant();
+    }
+    QFile vidfile(videoname,this);
+    qint64 file_size = vidfile.size();
+    qDebug() << "Preparing to send file: " << videoname << " of size " << file_size;
+    //get pointer to main ui object
+    QWidget * mainwindow = qobject_cast<QWidget *>(parent()->parent());
+    // spwan off stream transfer video
+    QAbstractSocket * caller_socket = qobject_cast< QAbstractSocket *>(caller);
+    StreamTransferThread * vidtransfer = new StreamTransferThread(qobject_cast<QObject *>(this),mainwindow,
+                                                                  videoname,caller_socket,file_size);
+    connect(vidtransfer, &StreamTransferThread::finishedTransferingStream,
+            this,       &RequestManager::videoTransferThreadFinished);
+    vidtransfer->start();
     return QVariant();
+
+}
+
+
+void RequestManager::videoTransferThreadFinished(QString videoname)
+{
+    qDebug() << "Finished Sending: " << videoname;
+    disconnect(sender(),0,this,0);
+    sender()->deleteLater();
+
 }
 
 RequestManager::~RequestManager()

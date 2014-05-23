@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Vide Captureo Configuration</string>
+   <string>Video Capture Configuration</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

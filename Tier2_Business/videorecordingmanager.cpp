@@ -12,7 +12,7 @@ VideoRecordingManager::VideoRecordingManager(MainWindow *parent,
                                              QString recording_resolution,
                                              QString current_device) :
     QObject(parent),mCurrentDirectory(video_directory),
-    mInfoReader(this,"mediainfo"),
+    mInfoReader(this,"mediainfo", "//home/odroid/.config/MissionControl/media_info_format.txt"),
     mVideoWriterProcess(this, video_process_path,video_encoder,
                         input_format,recording_resolution,
                         current_device)

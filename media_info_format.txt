@@ -1,0 +1,3 @@
+General;\r\nFile Name :%CompleteName%\r\nName :%FileName%.%FileExtension%\r\nSize :%FileSize%\r\nDuration :%Duration%\r\n
+Video;Resolution :%Width%x%Height%\r\nAspect :%DisplayAspectRatio/String%\r\nFrameRate :%FrameRate%\r\nFrameCount :%FrameCount%\r\nStreamSize :%StreamSize%\r\n
+Audio;Codec = %Format%\r\nBitRate :%BitRate%\r\nChannels :%Channel(s)%\r\nSamplingRate :%SamplingRate%

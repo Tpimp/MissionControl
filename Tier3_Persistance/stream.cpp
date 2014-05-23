@@ -1,6 +1,6 @@
 #include "stream.h"
-Stream::Stream(QObject *parent, QIODevice *io, QAbstractSocket &socket) :
-    QObject(parent), mBuffer(this), mSocket(socket), mFile(nullptr)
+Stream::Stream(QObject *parent, QIODevice *io, QAbstractSocket *& socket) :
+    QObject(parent), mBuffer(this), mSocket(*socket), mFile(nullptr)
 {
     mStream.setDevice(io);
     if(!io->isOpen())
@@ -13,8 +13,8 @@ Stream::Stream(QObject *parent, QIODevice *io, QAbstractSocket &socket) :
     mSocket.write(mBuffer.data().data(), size);
 }
 
-Stream::Stream(QObject *parent, QString file_path, QAbstractSocket &socket) :
-    QObject(parent), mBuffer(this), mSocket(socket)
+Stream::Stream(QObject *parent, QString file_path, QAbstractSocket *socket) :
+    QObject(parent), mBuffer(this), mSocket(*socket)
 {
     mFile = new QFile(file_path,this);
     mStream.setDevice(mFile);

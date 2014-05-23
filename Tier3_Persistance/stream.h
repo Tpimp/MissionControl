@@ -13,10 +13,10 @@ class Stream : public QObject
     Q_OBJECT
 public:
 
-    explicit Stream(QObject *parent, QIODevice *io, QAbstractSocket & socket);
-    Stream(QObject *parent, QString file_path, QAbstractSocket & socket);
+    explicit Stream(QObject *parent, QIODevice *io, QAbstractSocket *& socket);
+    Stream(QObject *parent, QString file_path, QAbstractSocket * socket);
     ~Stream();
-
+    QString getFileName(){return mFile ? mFile->fileName():QString();}
 signals:
     void updateTotalBytesWritten(qint64 byteswritten);
 
@@ -29,7 +29,7 @@ private:
     QDataStream        mStream;
     QBuffer            mBuffer;
     QAbstractSocket &  mSocket;
-    QFile           *  mFile;
+    QFile           *  mFile = nullptr;
 
 };
 

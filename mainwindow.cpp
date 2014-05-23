@@ -144,7 +144,7 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
             SLOT(hide()));
 
 
-    mConnectionManager.startServer(QHostAddress("192.168.3.108"), 8889);
+    mConnectionManager.startServer(QHostAddress("192.168.3.115"), 8889);
 }
 
 
@@ -229,7 +229,6 @@ void MainWindow::configureVideoRecordingManager()
                                                mConfigUi->SelectInputFormat->currentText(),
                                                mConfigUi->SelectResolution->currentText(),
                                                mConfigUi->SelectDevice->currentText());
-    connect(mRecordManager,SIGNAL(mediaInfoAvailable(QString,QString)),this,SLOT(writeMediaInfo(QString,QString)));
     mConfigDialog.hide();
 
 }

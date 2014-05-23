@@ -1,6 +1,6 @@
 #include "streamtransferthread.h"
 
-StreamTransferThread::StreamTransferThread(QObject *parent, QWidget* mainwindow,  QString filepath, QAbstractSocket & socket, qint64 stream_stize) :
+StreamTransferThread::StreamTransferThread(QObject *parent, QWidget *&mainwindow,  QString &filepath, QAbstractSocket *&socket, qint64& stream_size) :
     QThread(parent),mStream(this, filepath, socket), mProgress(mainwindow)
 {
     connect(&mStream,
@@ -16,6 +16,6 @@ void StreamTransferThread::run()
     mProgress.show();
     exec();
 
-    emit finishedTransferingStream();
+    emit finishedTransferingStream(mStream.getFileName());
 
 }
