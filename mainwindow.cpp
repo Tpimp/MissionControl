@@ -6,23 +6,28 @@
 #include <QIcon>
 #include <QTimer>
 #include <QDateTime>
+#include <QNetworkInterface>
 // Static global strings used for output
 
 static const char* REPLACE_TOKEN("***-***");
 
+// Define some HTML code to assist color coding of output
 static const char* BLUE_TEXT_HTML(
+
  "<p><span style=\"color:#000080;font-size:18px;\">"
  "<span style=\"background-color:#ffffff;\">"
  "***-***"                                    // <- replace token
  "</span></span></p><BR>");
 
 static const char* RED_TEXT_HTML(
+
  "<p><span style=\"color:#ff0000;font-size:18px;\">"
  "<span style=\"background-color:#ffff00;\">"
  "***-***"                                    // <- replace token
  "</span></span></p><BR>");
 
 static const char* GREEN_TEXT_HTML(
+
  "<p><span style=\"color:#006400;font-size:18px;\">"
  "<span style=\"background-color:#ffffff;\">"
  "***-***"                                    // <- replace token
@@ -39,7 +44,10 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
     mServerDialog(this),
     mConnectionManager(this)
 {
+    // Setup the Main UI and Add remaing items not declared in the .ui file
     ui->setupUi(this);
+
+    // create the system tray
     mTrayIcon = new QSystemTrayIcon(this);
     mTrayIcon->setIcon(QIcon(R"(:/images/droneicon.png)"));
     mTrayIcon->setToolTip("Test");
@@ -48,20 +56,20 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
         writeMessage(RED_TEXT_HTML,"System Tray Icons are not available on this system.");
     else
         writeMessage(GREEN_TEXT_HTML,"System Tray Icons are available on this system.");
+
+    // Create the Menu system (on rightclick) of system tray
     QMenu *changer_menu = new QMenu;
-
-
     mShowMain_action = new QAction(tr("Show MainWindow"),this);
     mShowMain_action->setIconVisibleInMenu(false);
     connect(mShowMain_action, SIGNAL(triggered()), this, SLOT(show()));
     changer_menu->addAction(mShowMain_action);
     changer_menu->addSeparator();
 
-    mShowCfg_action = new QAction(tr("Show Video Configure"),this);
-    mShowCfg_action->setIconVisibleInMenu(false);
-    connect(mShowCfg_action, SIGNAL(triggered()), &mConfigDialog, SLOT(show()));
-    connect(mShowCfg_action, SIGNAL(triggered()), this, SLOT(show()));
-    changer_menu->addAction(mShowCfg_action);
+    mShowConfig_action = new QAction(tr("Show Video Configure"),this);
+    mShowConfig_action->setIconVisibleInMenu(false);
+    connect(mShowConfig_action, SIGNAL(triggered()), &mConfigDialog, SLOT(show()));
+    connect(mShowConfig_action, SIGNAL(triggered()), this, SLOT(show()));
+    changer_menu->addAction(mShowConfig_action);
     changer_menu->addSeparator();
 
     mToggleRecording_action = new QAction(tr("Start Video Capture"),this);
@@ -70,116 +78,101 @@ MainWindow::MainWindow(QApplication *app, QWidget *parent) :
     changer_menu->addAction(mToggleRecording_action);
     changer_menu->addSeparator();
 
-
     mQuit_action = new QAction(tr("&Quit"), this);
     mQuit_action->setIconVisibleInMenu(true);
     connect(mQuit_action, SIGNAL(triggered()), app, SLOT(quit()));
     changer_menu->addAction(mQuit_action);
+
+    // add the menus and show the system tray icon
     mTrayIcon->setContextMenu(changer_menu);
     mTrayIcon->show();
+
+    // In 800 Milliseconds - check the configuration
     QTimer::singleShot(800,this, SLOT(checkConfiguration()));
-    connect(ui->actionStart_Recording, // file menu start recording
-            SIGNAL(triggered()),       // triggered event
-            this,                      // calls this classes
-            SLOT(startRecording()));   // startRecording slot
-    connect(ui->actionStop_Recording,  // file menu stop recording
-            SIGNAL(triggered()),       // triggered event
-            this,                      // calls this classes
-            SLOT(stopRecording()));    // stopRecording slot    
-    connect(ui->actionOpen,            // open config
-            SIGNAL(triggered()),       // triggered event
-            &mConfigDialog,            // Config dialogs
-            SLOT(openDialog()));       // open
-    connect(ui->actionExit,            // action to exit
-            SIGNAL(triggered()),
-            app,
-            SLOT(quit()));
-    connect(ui->actionOpen_Server_Monitor,
-            SIGNAL(triggered()),
-            &mServerDialog,
-            SLOT(show()));
+
+    // connect signals and slots associate with main window
+    connect(ui->actionStart_Recording,SIGNAL(triggered()),
+            this,SLOT(startRecording()));
+    connect(ui->actionStop_Recording,SIGNAL(triggered()),
+            this,SLOT(stopRecording()));
+    connect(ui->actionOpen,SIGNAL(triggered()),
+            &mConfigDialog,SLOT(openDialog()));
+    connect(ui->actionExit,SIGNAL(triggered()),
+            app,SLOT(quit()));
+    connect(ui->actionOpen_Server_Monitor,SIGNAL(triggered()),
+            &mServerDialog,SLOT(show()));
 
     // connect up the Configure Dialog
-    mConfigUi = mConfigDialog.ui;      // get a convenience pointer
-    connect(mConfigUi->ButtonOk,       // connect ok button
-            SIGNAL(clicked()),
-            this,
-            SLOT(configureVideoRecordingManager()));
-    connect(mConfigUi->ButtonCancel,  // connect cancel
-            SIGNAL(clicked()),
-            &mConfigDialog,
-            SLOT(hide()));
+    mConfigUi = mConfigDialog.ui;
+    connect(mConfigUi->ButtonOk,SIGNAL(clicked()),
+            this,SLOT(configureVideoRecordingManager()));
+    connect(mConfigUi->ButtonCancel,SIGNAL(clicked()),
+            &mConfigDialog,SLOT(hide()));
 
 
     // connect up the server dialog
     mServerUi = mServerDialog.ui; // get a convenience pointer
-    connect(&mConnectionManager,
-            SIGNAL(connectionChangedState(QString,QString)),
-            &mServerDialog,
-            SLOT(connectionStateChanged(QString,QString)));
+    connect(&mConnectionManager,SIGNAL(connectionChangedState(QString,QString)),
+            &mServerDialog,SLOT(connectionStateChanged(QString,QString)));
+    connect(&mConnectionManager,SIGNAL(connectionCreated(QString)),
+            &mServerDialog,SLOT(connectionCreated(QString)));
+    connect(&mConnectionManager,SIGNAL(connectionLost(QString)),
+            &mServerDialog,SLOT(socketDisconnected(QString)));
+    connect(&mConnectionManager,SIGNAL(connectionErrored(QString,QString)),
+            &mServerDialog,SLOT(connectionErrorOccured(QString,QString)));
+    connect(&mConnectionManager,SIGNAL(serverBeganListening(QHostAddress,int)),
+            &mServerDialog,SLOT(serverListening(QHostAddress,int)));
+    connect(mServerUi->actionClose,SIGNAL(triggered()),
+            &mServerDialog,SLOT(hide()));
 
-    connect(&mConnectionManager,
-            SIGNAL(connectionCreated(QString)),
-            &mServerDialog,
-            SLOT(connectionCreated(QString)));
+    // get the list of network IPs and begin listening on one
+    QHostAddress local_ip;
+    QList<QHostAddress> addresses(QNetworkInterface::allAddresses());
+    foreach(QHostAddress address, addresses)
+    {
+        if(!address.isLoopback() && address.protocol() == QAbstractSocket::IPv4Protocol)
+        {
+            local_ip = address;
+            break;
+        }
+    }
 
-    connect(&mConnectionManager,
-            SIGNAL(connectionLost(QString)),
-            &mServerDialog,
-            SLOT(socketDisconnected(QString)));
-
-    connect(&mConnectionManager,
-            SIGNAL(connectionErrored(QString,QString)),
-            &mServerDialog,
-            SLOT(connectionErrorOccured(QString,QString)));
-
-    connect(&mConnectionManager,
-            SIGNAL(serverBeganListening(QHostAddress,int)),
-            &mServerDialog,
-            SLOT(serverListening(QHostAddress,int)));
-
-    connect(mServerUi->actionClose,
-            SIGNAL(triggered()),
-            &mServerDialog,
-            SLOT(hide()));
-
-
-    mConnectionManager.startServer(QHostAddress("192.168.3.115"), 8889);
+    mConnectionManager.startServer(local_ip);
 }
 
 
 bool MainWindow::checkConfiguration()
 {
     // check for invalid settings, flag setupcomple false if found    
-    bool SetupComplete(true);
+    bool setup_complete(true);
     
     // Check process path
-    QString processpath(mConfigUi->ProcessPath->text());
-    QDir dir(processpath);
-    dir.setCurrent(processpath);
-    qDebug() << processpath;
-    if(processpath.isEmpty() || processpath == "")
+    QString process_path(mConfigUi->ProcessPath->text());
+    QDir video_directory(process_path);
+    video_directory.setCurrent(process_path);
+    qDebug() << process_path;
+    if(process_path.isEmpty() || process_path == "")
     {
         writeMessage(RED_TEXT_HTML, "Process Path is incorrectly configured.");
-        SetupComplete = false;
+        setup_complete = false;
     }
     
     // check video directory
-    QString viddir(mConfigUi->VideoDirectory->text());
-   // dir.setCurrent(viddir);
-    dir.cd(viddir);
-    qDebug() << viddir;
-    if(viddir.isEmpty() ||viddir == "" || !dir.exists())
+    QString video_directory_path(mConfigUi->VideoDirectory->text());
+    video_directory.cd(video_directory_path);
+    qDebug() << video_directory_path;
+    if(video_directory_path.isEmpty() ||video_directory_path == "" || !video_directory.exists())
     {
         writeMessage(RED_TEXT_HTML, "Video Directory is incorrectly configured.");
-        SetupComplete = false;
+        setup_complete = false;
     }
 
+    // check for the camera
     QString device(mConfigUi->SelectDevice->currentText());
     if(device.isEmpty() ||device == "" )
     {
         writeMessage(RED_TEXT_HTML, "Could Not Find Camera Device!");
-        SetupComplete = false;
+        setup_complete = false;
 
         this->close();
         qWarning() << "No Camera was found.";
@@ -188,40 +181,45 @@ bool MainWindow::checkConfiguration()
         return false;
     }
 
-
+    // check resolution
     QString resolution(mConfigUi->SelectResolution->currentText());
     if(resolution.isEmpty() ||resolution == "" )
     {
         writeMessage(RED_TEXT_HTML, "No Resolution Specified");
-        SetupComplete = false;
+        setup_complete = false;
     }
 
-
+    // check format
     QString format(mConfigUi->SelectInputFormat->currentText());
     if(format.isEmpty() ||format == "" )
     {
         writeMessage(RED_TEXT_HTML, "Invalid Input Format Specified.");
-        SetupComplete = false;
+        setup_complete = false;
     }
 
+    // check autonomous mode
     Qt::CheckState state = mConfigUi->ToggleAutonomousMode->checkState();
     mAutonomousMode =  state == Qt::Checked ? true:false;
 
 
-
+    // check encoder
     QString encoder(mConfigUi->SelectVideoEncoder->currentText());
     if(encoder.isEmpty() ||encoder == "" )
     {
         writeMessage(RED_TEXT_HTML, "No Video Encoder Specified");
-        SetupComplete = false;
+        setup_complete = false;
     }
-    mTrayIcon->showMessage("Passed Configuration","Configuration Passed please choose a file location!");
-    return SetupComplete;
+
+    // notify user and return if setup completed successfully or failed
+    if(setup_complete)
+        mTrayIcon->showMessage("Passed Configuration","Configuration Passed please choose a file location!");
+    return setup_complete;
 }
 
 
 void MainWindow::configureVideoRecordingManager()
 {
+    // each time a new configuration happens create a new record manager and hide the dialog
     delete mRecordManager;
     mRecordManager = new VideoRecordingManager(this,(mConfigUi->VideoDirectory->text() +"/"),
                                                mConfigUi->ProcessPath->text(),
@@ -235,9 +233,8 @@ void MainWindow::configureVideoRecordingManager()
 
 void MainWindow::startRecording()
 {
+
     writeMessage(BLUE_TEXT_HTML,"Requested to Start Recording, Fetching File Path.");
-
-
 
     // Check if Config has been properly completed
     if(!checkConfiguration())
@@ -306,7 +303,7 @@ void MainWindow::startRecording()
 
 void MainWindow::toggleRecording()
 {
-
+    // toggle recording on or off
     if(mRecording)
     {
         stopRecording();
@@ -324,6 +321,7 @@ void MainWindow::toggleRecording()
 
 void MainWindow::stopRecording()
 {
+    // if there is a recording manager, stop the recording and notify user recording is done
     if(mRecordManager)
     {
         mRecordManager->stopRecording();
@@ -352,7 +350,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete mShowMain_action;
-    delete mShowCfg_action;
+    delete mShowConfig_action;
     delete mQuit_action;
     delete mTrayIcon;
 }

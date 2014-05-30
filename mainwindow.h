@@ -12,8 +12,9 @@
 #include "ui_serverdialog.h"
 #include "Tier2_Business/clientconnectionmanager.h"
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -22,24 +23,27 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+
     explicit MainWindow(QApplication *app, QWidget *parent = 0);
-
     void writeMessage(const QString & HTML_ENCODING, QString message_out);
-
     ~MainWindow();
 
 public slots:
+
     void toggleRecording();
     void startRecording();
     void stopRecording();
 
 protected slots:
-    void writeMediaInfo(QString video_path, QString mediadata);
+
+    bool checkConfiguration();
     void configureVideoRecordingManager();
-    bool   checkConfiguration();
+    void writeMediaInfo(QString video_path, QString mediadata);
+
+
 private:
-    Ui::MainWindow          *ui;
-    QApplication            *mApp;
+    Ui::MainWindow*          ui;
+    QApplication*           mApp;
     VideoRecordingManager*  mRecordManager;
     ClientConnectionManager mConnectionManager;
     ConfigDialog            mConfigDialog;
@@ -48,7 +52,7 @@ private:
     Ui::ServerDialog*       mServerUi;
     QSystemTrayIcon*        mTrayIcon;
     QAction*                mShowMain_action;
-    QAction*                mShowCfg_action;
+    QAction*                mShowConfig_action;
     QAction*                mToggleRecording_action;
     QAction*                mQuit_action;
     bool                    mRecording = false;

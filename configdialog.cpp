@@ -9,8 +9,8 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
     ui(new Ui::ConfigDialog)
 {
     ui->setupUi(this);
-    connect(ui->GetProcessPath,SIGNAL(clicked()),this, SLOT(findProcPath()));
-    connect(ui->GetVideoDirectory,SIGNAL(clicked()),this, SLOT(findVidDir()));
+    connect(ui->GetProcessPath,SIGNAL(clicked()),this, SLOT(findProcessPath()));
+    connect(ui->GetVideoDirectory,SIGNAL(clicked()),this, SLOT(findVideDirectory()));
     QList<QByteArray> camera_list( QCamera::availableDevices() );
     foreach(QByteArray device_name, camera_list)
     {
@@ -43,7 +43,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
 void ConfigDialog::openDialog()
 {
     ui->SelectDevice->clear();
-    QList<QByteArray> camera_list( QCamera::availableDevices() );
+    QList<QByteArray> camera_list(QCamera::availableDevices());
     foreach(QByteArray device_name, camera_list)
     {
         ui->SelectDevice->addItem(device_name);
@@ -76,14 +76,14 @@ void ConfigDialog::openDialog()
 }
 
 
-void ConfigDialog::findProcPath()
+void ConfigDialog::findProcessPath()
 {
     // look for Process Path
     QString process_path(QFileDialog::getOpenFileName(this, "Find ffmpeg"));
     ui->ProcessPath->setText(process_path);
 }
 
-void ConfigDialog::findVidDir()
+void ConfigDialog::findVideoDirectory()
 {
 
     QString vid_dir(QFileDialog::getExistingDirectory(this, "Find Directory to Save to"));

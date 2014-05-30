@@ -19,7 +19,10 @@ VideoRecordingManager::VideoRecordingManager(MainWindow *parent,
 {
     connect(&mVideoWriterProcess,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(recordingFinished(int,QProcess::ExitStatus)));
-    connect(&mInfoReader,SIGNAL(FetchedMediaInfo(QString,QString)),parent,SLOT(writeMediaInfo(QString,QString)));
+
+    connect(&mInfoReader,SIGNAL(FetchedMediaInfo(QString,QString)),parent,
+            SLOT(writeMediaInfo(QString,QString)));
+
 
 }
 

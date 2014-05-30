@@ -1,13 +1,19 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QTimer>
+
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w(&a);
-    a.setApplicationDisplayName("Mission Control");
-    a.setQuitOnLastWindowClosed(false);
-    w.show();
-    return a.exec();
+    // Create the main application and main window
+    QApplication application(argc, argv);
+    MainWindow window(&application);
+
+    // Cofnigure for Mission Control and Daemon mode
+    application.setApplicationDisplayName("Mission Control");
+    application.setQuitOnLastWindowClosed(false);
+
+    // show the application and begin event loop
+    window.show();
+    return application.exec();
 
 }

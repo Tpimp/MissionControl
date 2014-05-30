@@ -18,8 +18,8 @@ public:
      
 public slots:
      void openDialog();
-     void findProcPath();
-     void findVidDir();
+     void findProcessPath();
+     void findVideoDirectory();
 
 };
 

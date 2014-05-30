@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QHostAddress>
+#include <QLabel>
 namespace Ui {
 class ServerDialog;
 }
@@ -24,6 +25,8 @@ private slots:
     void socketDisconnected(QString socket_id);
     void serverListening(QHostAddress address, int port);
 
+private:
+    QLabel*    mStatusText;
 };
 
 #endif // MAINWINDOW_H

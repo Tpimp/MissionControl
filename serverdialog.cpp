@@ -7,55 +7,69 @@ ServerDialog::ServerDialog(QWidget *parent) :
     ui(new Ui::ServerDialog)
 {
     ui->setupUi(this);
+
+    // add status bar
+    mStatusText = new QLabel(ui->statusBar);
+    mStatusText->setText("Server not connected");
+    mStatusText->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    mStatusText->setGeometry(0,0,200,40);
+    mStatusText->show();
+    ui->statusBar->addWidget(mStatusText);
+    ui->statusBar->show();
+
 }
 
 
 void ServerDialog::connectionCreated(QString socket_id)
 {
+    // if the socket existed before, updtate its state else add a new item with state connected
     QList<QTableWidgetItem *> socket_id_items = ui->tableWidget->findItems(socket_id,Qt::MatchExactly);
     if(socket_id_items.size() > 0)
     {
-        QTableWidgetItem * item = socket_id_items[0];
-        QTableWidgetItem * status = ui->tableWidget->item(item->row(),1);
-        status->setText("Connected");
+        QTableWidgetItem * socket_id_item = socket_id_items[0];
+        QTableWidgetItem * status_item = ui->tableWidget->item(socket_id_item->row(),1);
+        status_item->setText("Connected");
     }
     else
     {
         QTableWidgetItem * socket_id_item = new QTableWidgetItem(socket_id);
-        QTableWidgetItem * state = new QTableWidgetItem("Connected");
-        int rows(ui->tableWidget->rowCount());
-        ui->tableWidget->insertRow(rows);
-        ui->tableWidget->setItem(rows,0,socket_id_item);
-        ui->tableWidget->setItem(rows,1,state);
+        QTableWidgetItem * status_item = new QTableWidgetItem("Connected");
+        int row_count(ui->tableWidget->rowCount());
+        ui->tableWidget->insertRow(row_count);
+        ui->tableWidget->setItem(row_count,0,socket_id_item);
+        ui->tableWidget->setItem(row_count,1,status_item);
     }
 
 }
 
 void ServerDialog::connectionErrorOccured(QString socket_id, QString error_message)
 {
+    // update the connection status
     QList<QTableWidgetItem *> socket_id_items = ui->tableWidget->findItems(socket_id,Qt::MatchExactly);
     if(socket_id_items.size() > 0)
     {
-        QTableWidgetItem * item = socket_id_items[0];
-        QTableWidgetItem * status = ui->tableWidget->item(item->row(),1);
-        status->setText(error_message);
+        QTableWidgetItem * socket_id_item = socket_id_items[0];
+        QTableWidgetItem * status_item = ui->tableWidget->item(socket_id_item->row(),1);
+        status_item->setText(error_message);
     }
 }
 
 void ServerDialog::connectionStateChanged(QString socket_id, QString state_message)
 {
+    // update the associate socket state
     QList<QTableWidgetItem *> socket_id_items = ui->tableWidget->findItems(socket_id,Qt::MatchExactly);
     if(socket_id_items.size() > 0)
     {
-        QTableWidgetItem * item = socket_id_items[0];
-        QTableWidgetItem * status = ui->tableWidget->item(item->row(),1);
-        status->setText(state_message);
+        QTableWidgetItem * socket_id_item = socket_id_items[0];
+        QTableWidgetItem * state_item = ui->tableWidget->item(socket_id_item->row(),1);
+        state_item->setText(state_message);
     }
 }
 
 
 void ServerDialog::socketDisconnected(QString socket_id)
 {
+    // update the associated socket status to disconnected
     QList<QTableWidgetItem *> socket_id_items = ui->tableWidget->findItems(socket_id,Qt::MatchExactly);
     if(socket_id_items.size() > 0)
     {
@@ -67,19 +81,16 @@ void ServerDialog::socketDisconnected(QString socket_id)
 
 void ServerDialog::serverListening(QHostAddress address, int port)
 {
-    QString msg("Server Started:");
-    msg.append(" @ " + address.toString());
-    msg.append(" on " + QString::number(port) );
-    QLabel * status_label = new QLabel(ui->statusBar);
-    status_label->setText(msg);
-    status_label->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    status_label->setGeometry(0,0,200,40);
-    status_label->show();
-    ui->statusBar->addWidget(status_label);
-    ui->statusBar->show();
+    // update the server status string in the Status bar
+    QString server_status("Server Running:");
+    server_status.append(" @ " + address.toString());
+    server_status.append(" on " + QString::number(port) );
+    mStatusText->setText(server_status);
+
 }
 
 ServerDialog::~ServerDialog()
 {
-    delete ui;
+    delete mStatusText;
+    delete ui;    
 }

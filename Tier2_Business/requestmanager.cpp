@@ -223,14 +223,15 @@ QVariant RequestManager::requestVideoInfo(QTcpSocket *caller, QVariant params)
     QJsonValue videoname_value = jobject["VideoName"];
     QString videoname;
     if(videoname_value.isString())
-        videoname = videoname_value.toString("");
+        videoname = videoname_value.toString();
     else
     {
         qDebug() << "VideoInfo function passed invalid paramter VideoName: " << videoname_value;
         return QVariant();
     }
-
     // fetched videoname now check if the info file exists
+
+    //TODO Replace hard coded path with application settings manager variable
     VideoInfoReader   * inforeader = new VideoInfoReader(this,"mediainfo", "//home/odroid/.config/MissionControl/media_info_format.txt");
 
 
@@ -259,8 +260,6 @@ QVariant RequestManager::requestVideoInfo(QTcpSocket *caller, QVariant params)
     });
 
     inforeader->FetchMediaInfo(mVideoDirectory + "//" + videoname);
-   // mRecordingManager->requestMediaInfo(mVideoDirectory +  videoname);
-
     return QVariant();
 }
 

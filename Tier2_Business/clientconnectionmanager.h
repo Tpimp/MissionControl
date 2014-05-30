@@ -13,7 +13,7 @@ class ClientConnectionManager : public QObject
     Q_OBJECT
 public:
     explicit ClientConnectionManager(QObject *parent = 0);
-    void startServer(QHostAddress address = QHostAddress::Any, int port = 8889);
+    void startServer(QHostAddress address = QHostAddress::AnyIPv4, int port = 8889);
 
 signals:
     void connectionCreated(QString socket_id);
