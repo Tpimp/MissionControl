@@ -173,11 +173,7 @@ bool MainWindow::checkConfiguration()
     {
         writeMessage(RED_TEXT_HTML, "Could Not Find Camera Device!");
         setup_complete = false;
-
-        this->close();
         qWarning() << "No Camera was found.";
-        mConfigDialog.close();
-        mApp->exit(2);
         return false;
     }
 
@@ -340,10 +336,12 @@ void MainWindow::writeMessage(const QString & HTML_ENCODING, QString message_out
 }
 
 
-void MainWindow::writeMediaInfo(QString video_path, QString mediadata)
+void MainWindow::writeMediaInfo(QString video_path, QString mediadata,QPixmap thumbnail)
 {
     writeMessage(BLUE_TEXT_HTML, QString("Finshed Recording Video: " + video_path));
     writeMessage(GREEN_TEXT_HTML, QString(mediadata).toHtmlEscaped());
+    writeMessage(GREEN_TEXT_HTML, "Thumbnail Created:");
+    ui->thumbnailLabel->setPixmap(thumbnail);
 }
 
 MainWindow::~MainWindow()

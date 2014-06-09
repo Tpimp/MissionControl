@@ -38,7 +38,7 @@ protected slots:
 
     bool checkConfiguration();
     void configureVideoRecordingManager();
-    void writeMediaInfo(QString video_path, QString mediadata);
+    void writeMediaInfo(QString video_path, QString mediadata, QPixmap thumbnail);
 
 
 private:

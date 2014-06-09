@@ -97,7 +97,7 @@ void ClientConnectionManager::connectionStateChanged(QAbstractSocket::SocketStat
 
 void ClientConnectionManager::sendReturnMessage(QTcpSocket * target, QByteArray message)
 {
-    qDebug() << "Sending Return Message: " << message;
+   // qDebug() << "Sending Return Message: " << message;
     target->write(message.data(),message.size());
     target->waitForBytesWritten(3000);
 }
@@ -127,7 +127,21 @@ void ClientConnectionManager::socketDisconnected()
 
 void ClientConnectionManager::startServer(QHostAddress address, int port)
 {
+
     mServer.listen(address,port);
     emit serverBeganListening(mServer.serverAddress(),mServer.serverPort());
 }
 
+ClientConnectionManager::~ClientConnectionManager()
+{
+    foreach(QTcpSocket * connection, mSockets)
+    {
+        connection->disconnectFromHost();
+        connection->flush();
+        connection->close();
+        delete connection;
+    }
+    mSockets.clear();
+    mServer.close();
+
+}

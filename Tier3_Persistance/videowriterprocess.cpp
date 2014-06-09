@@ -22,13 +22,15 @@ void VideoWriterProcess::startRecording(QString filename)
     // set the video encoder codec to use
     arguments << "-f"  << mVideoEncoder
                        // set input format
-                       << "-input_format" << mInputFormat
+                       << "-r" << "25"
+                       <<  "-i" << mCurrentDevice
+                      // << "-input_format" << mInputFormat
+                       << "-strict" << "experimental"
                        // set the recording resolution
                        << "-s" << mRecordingResolution
-                       // set the camera device to use
-                       << "-i" << mCurrentDevice
+                       << "-vcodec" << "mpeg4"
                        // set filename
-                        << (filename);
+                       << "-y" << (filename);
     qDebug() << "Recording arguments" << arguments;
     // Begin the video writer sub process
     start(mVideoProcess,arguments);

@@ -10,7 +10,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->GetProcessPath,SIGNAL(clicked()),this, SLOT(findProcessPath()));
-    connect(ui->GetVideoDirectory,SIGNAL(clicked()),this, SLOT(findVideDirectory()));
+    connect(ui->GetVideoDirectory,SIGNAL(clicked()),this, SLOT(findVideoDirectory()));
     QList<QByteArray> camera_list( QCamera::availableDevices() );
     foreach(QByteArray device_name, camera_list)
     {

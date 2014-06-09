@@ -3,28 +3,32 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QPixmap>
+#include <QBuffer>
+
 class VideoInfoReader : public QObject
 {
     Q_OBJECT
 public:
     explicit VideoInfoReader(QObject *parent, QString media_info_process, QString file_format);
-
+    ~VideoInfoReader();
 signals:
-    void FetchedMediaInfo(QString video_name, QString video_info);
-
+    void fetchedMediaInfo(QString video_name, QString video_info);
 
 public slots:
-
-    void FetchMediaInfo(QString video_path);
-    void ProcessFinished();
-    void RecievedBytes();
+    void fetchMediaInfo(QString video_path);
+    void processFinished();
+    void thumbnailProcessFinished();
+    void recievedBytes();
 
 private:
-    QString mMediaData;
-    QString mFormatFile = R"(/home/odroid/.config/MissionControl/media_info_format.txt)";
-    QString mCurrentMediaPath;
-    QString mProcessPath;
-    QProcess mProcess;
+    void fetchVideoThumbnail();
+    QString  mMediaData;
+    QString  mFormatFile = R"(/home/odroid/.config/MissionControl/media_info_format.txt)";
+    QString  mCurrentMediaPath;
+    QString  mProcessPath;
+    QProcess* mProcess;
+    QByteArray mThumbnailBuffer;
 
 
 

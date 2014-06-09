@@ -20,8 +20,8 @@ VideoRecordingManager::VideoRecordingManager(MainWindow *parent,
     connect(&mVideoWriterProcess,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(recordingFinished(int,QProcess::ExitStatus)));
 
-    connect(&mInfoReader,SIGNAL(FetchedMediaInfo(QString,QString)),parent,
-            SLOT(writeMediaInfo(QString,QString)));
+    connect(&mInfoReader,SIGNAL(fetchedMediaInfo(QString,QString,QPixmap)),parent,
+            SLOT(writeMediaInfo(QString,QString,QPixmap)));
 
 
 }
@@ -31,7 +31,7 @@ VideoRecordingManager::VideoRecordingManager(MainWindow *parent,
 
 void VideoRecordingManager::recordingFinished(int,QProcess::ExitStatus)
 {
-    mInfoReader.FetchMediaInfo(mCurrentDirectory + mCurrentVideoName);
+    mInfoReader.fetchMediaInfo(mCurrentDirectory + mCurrentVideoName);
 }
 
 
@@ -46,7 +46,7 @@ void VideoRecordingManager::startRecording(QString filename)
 
 void VideoRecordingManager::requestMediaInfo(QString video_path)
 {
-    mInfoReader.FetchMediaInfo(video_path);
+    mInfoReader.fetchMediaInfo(video_path);
 }
 
 
